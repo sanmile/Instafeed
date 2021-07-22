@@ -2,9 +2,9 @@
   "name": "Instafeed",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "process.js",
   "scripts": {
-    "start": "node index",
+    "start": "node process",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .  --ext .js"
   },
@@ -26,5 +26,9 @@
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^1.7.0"
+  },
+  "dependencies": {
+    "joi": "^17.4.1",
+    "yup": "^0.32.9"
   }
 }
