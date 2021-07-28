@@ -1,4 +1,12 @@
-'use strict';
-const validation = require('./validation')
+const { validationFile } = require('./validation')
+const fs = require("fs");
 
-validation.validationFile();
+try {
+    const data = fs.readFileSync('article.json')
+    const article = JSON.parse(data)
+    validationFile(article);
+    
+} catch (error) {
+    console.log(err)
+    return
+}
