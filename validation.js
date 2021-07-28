@@ -1,5 +1,6 @@
 const yup = require("yup");
 const { parse, isDate } = require("date-fns");
+const { tr } = require("date-fns/locale");
 
 function parseDateString(value, originalValue) {
   originalValue = originalValue === "" ? null : originalValue;
@@ -40,16 +41,20 @@ const articleSchema = yup.object({
     source: yup.mixed().oneOf(['ARTICLE',  'BLOG', 'TWEET', 'NEWSPAPER']).required()
   });
 
-const validationFile = (data) => {
-  articleSchema.validate(data)
-  .then(function (value) {
-      console.log('Success!!');
-    })
-  .catch(function (err) {
-      err.name; // => 'ValidationError'
-      err.errors; // => ['age must be a number']
-      console.log(`${err.name}: ${err.errors}`);
-    });
+const  validationFile = (data) => {
+  //return articleSchema.isValidSync(data);
+  let isValid= false;
+  try {
+    articleSchema.validateSync(data)
+    console.log('Success!!');
+    isValid= true;
+  } catch (error) {
+    if(error.name === 'ValidationError'){
+      console.log(`${error.name}: ${error.errors}`);
+    }
+  }
+
+   return isValid;
 }
 
 module.exports = {

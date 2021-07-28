@@ -1,11 +1,11 @@
 {
-    "id": "4a71a08a-b31e-427e-84f3-127a1273ffd",
-    "title": "Understanding Node.js File System Module",
-    "url": "",
-    "keywords": [1],
-    "modifiedAt": "04/24/2019",
-    "publishedAt": "05/24/2019",
-    "author": "Swathi Prasad",
-    "readMins": 10,
-    "source": "NEWSPAPER"
-  }
+  "id": "123",
+  "title": "Writing neat asynchronous Node JS code with Promises",
+  "url": "http://medium.com/dev-bits/writing-neat-asynchronous-node-js-code-with-promises-32ed3a4fd098",
+  "keywords": ["", "Nodejs", "Promises"],
+  "modifiedAt": "06/04/2017",
+  "publishedAt": "06/04/2017",
+  "author": "Naren Yellavula",
+  "readMins": -8,
+  "source": "UNKNOWN"
+}
