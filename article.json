@@ -1,11 +1,10 @@
 {
-    "id": "4a71a08a-b31e-427e-84f3-127a1273ffd",
-    "title": "Understanding Node.js File System Module",
-    "url": "",
-    "keywords": [1],
-    "modifiedAt": "04/24/2019",
-    "publishedAt": "05/24/2019",
-    "author": "Swathi Prasad",
-    "readMins": 10,
-    "source": "NEWSPAPER"
-  }
+  "id": "22ca4ccf-8d14-4035-9cbb-c1d0aee5ef38",
+  "title": "Understanding JavaScript Promises",
+  "url": "https://nodejs.dev/learn/understanding-javascript-promises",
+  "keywords": [],
+  "modifiedAt": "02/10/2021",
+  "author": "nodejs.dev",
+  "readMins": 0,
+  "source": "ARTICLE"
+}
