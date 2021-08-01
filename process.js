@@ -7,7 +7,6 @@ try {
     const isValid = validationFile(article);
     if(isValid)
     {
-        //fs.appendFileSync('db.json', article);
          const db = fs.createWriteStream("db.json", { flags: "a" });
          db.write(JSON.stringify(article));
          db.end();
