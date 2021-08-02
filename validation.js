@@ -37,7 +37,7 @@ const articleSchema = yup.object({
     publishedAt: yup.date().nullable().max(lastDay).transform(parseDateString),
     author: yup.string().max(100).required(),
     //author: yup.object(author).required(),
-    readMins: yup.number().positive().min(1).max(10).required(),
+    readMins: yup.number().positive().min(1).max(20).required(),
     source: yup.mixed().oneOf(['ARTICLE',  'BLOG', 'TWEET', 'NEWSPAPER']).required()
   });
 
