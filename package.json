@@ -5,6 +5,7 @@
   "main": "process.js",
   "scripts": {
     "start": "node process",
+    "process": "node process",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .  --ext .js"
   },
