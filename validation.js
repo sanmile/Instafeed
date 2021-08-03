@@ -42,19 +42,16 @@ const articleSchema = yup.object({
   });
 
 const  validationFile = (data) => {
-  //return articleSchema.isValidSync(data);
-  let isValid= false;
-  try {
-    articleSchema.validateSync(data)
-    console.log('Success!!');
-    isValid= true;
-  } catch (error) {
-    if(error.name === 'ValidationError'){
-      console.log(`${error.name}: ${error.errors}`);
-    }
-  }
-
-   return isValid;
+    return new Promise((resolve, reject) => {
+    articleSchema.validate(data)
+    .then(() => {resolve (true)})
+    .catch((error) => {
+        if(error.name === 'ValidationError'){
+          reject(`${error.name}: ${error.errors}`)
+          console.log(`${error.name}: ${error.errors}`);
+        }
+      });
+    });
 }
 
 module.exports = {
