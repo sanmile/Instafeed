@@ -1,23 +1,48 @@
 const { validationFile } = require("./validation")
 const fs = require("fs");
-
+const path = 'articles';
 try {
-    const length = fs.readdirSync('articles').length
-    for(let i = 1; i <= length; i++){
-        const data = fs.readFileSync(`articles/article${i}.json`);
-        const article = JSON.parse(data);
-        const isValid = validationFile(article);
-        
-        if(isValid){
-            const db = fs.createWriteStream("db.json", { flags: "a" });
-            db.write(JSON.stringify(article));
-            db.end();
-        }else{
-            const invalid = fs.createWriteStream("invalid.json", { flags: "a" });
-            invalid.write(JSON.stringify(article));
-            invalid.end();
+
+    const promise = new Promise((resolve, reject)=>{
+        fs.readdir(path, function(error, articles){
+            if(error) reject(error)
+            else resolve(articles);
+        });
+    });
+
+    const createWriteStreamPromise = (file, article)=>{       
+        const db = fs.createWriteStream(file, { flags: "a" });
+        db.write(`,${JSON.stringify(article)}`);
+        db.end();
+    }
+
+    promise.then(articles => {
+        if(articles && Array.isArray(articles))
+        {
+            articles.forEach(function (articleFile){
+                if(articleFile.endsWith('.json'))
+                {
+                    fs.readFile(`${path}/${articleFile}`, function(error, data){
+                        const article = JSON.parse(data);
+                        console.log(article);
+                        validationFile(article)
+                        .then((isValid)=> {
+                            console.log(isValid);
+                            if(isValid){
+                                createWriteStreamPromise("db.json", article);
+                            }else{
+                                createWriteStreamPromise("invalid.json", article);
+                            }
+                        }).catch(err=> {
+                            console.log(err);
+                            createWriteStreamPromise("invalid.json", article);
+                        });
+                    });
+                }
+            });
         }
-    }   
+    }).catch(err=> {console.log(err)});
+
 } catch (error) {
     console.log(error)
     return
