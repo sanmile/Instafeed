@@ -3,20 +3,23 @@ const fs = require("fs");
 const path = 'articles';
 try {
 
-    const promise = new Promise((resolve, reject)=>{
+    const readdir = new Promise((resolve, reject)=>{
         fs.readdir(path, function(error, articles){
             if(error) reject(error)
             else resolve(articles);
         });
     });
 
-    const createWriteStreamPromise = (file, article)=>{       
-        const db = fs.createWriteStream(file, { flags: "a" });
-        db.write(`,${JSON.stringify(article)}`);
-        db.end();
+    const createWriteStreamPromise = (file, article) => {       
+        const fs = require("fs");
+        let articlesJson = fs.readFileSync(file,"utf-8");
+        let articles = articlesJson ? JSON.parse(articlesJson): [];
+        articles.push(article);
+        articlesJson =  JSON.stringify(articles);
+        fs.writeFileSync(file, articlesJson,"utf-8");
     }
 
-    promise.then(articles => {
+    readdir.then(articles => {
         if(articles && Array.isArray(articles))
         {
             articles.forEach(function (articleFile){

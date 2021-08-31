@@ -1,37 +1,49 @@
-const http = require('http');
+const { exception } = require('console');
+const express = require('express');
+const fs = require("fs");
 const hostname = 'localhost';
-const port = 8080;
+var app = express();
+const port = 8081;
+let articles= [];
 
-const server = http.createServer((req, res)=>{
-    res.statusCode = 200;
-    res.headers('Content-Type','text/plain');
-
-    const options = {
-        hostname,
-        port,
-        path: '/articles',
-        method: 'GET'
+const readFile =() =>{
+    try {
+        fs.readFile(`db.json`, function(error, data){
+            articles = JSON.parse(data);
+        });    
+    } catch (error) {
+        console.log(error);
     }
-      
-    req = http.request(options, res => {
-    console.log(`statusCode: ${res.statusCode}`)
-    
-    res.on('data', d => {
-        process.stdout.write(d)
-    })
-    })
-    
-    req.on('error', error => {
-    console.error(error)
-    })
+}
 
-    req.end()
-    res.end();
+const getArticle = (id) =>{
+    try {
+        let article;
+        if(articles.length > 0)
+        {
+            article = articles.find(a => a.id == id);
+            return article;
+        }else throw ("article not found");
+    } catch (error) {
+        console.log(error);
+    }
+    
+}
+readFile();
+
+
+app.get('/articles', (req, res)=>{
+    res.send(articles);
 });
 
-server.listen(port, hostname, () =>{
+app.get('/article', (req, res)=>{
+    const id = req.query.id;
+    const article = getArticle(id);
+    res.send(article);
+});
+
+app.listen(port, hostname, () =>{
     console.log(`Server running at http://${hostname}:${port}/`);
 });
-
 
 
