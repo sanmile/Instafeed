@@ -1,6 +1,5 @@
 const yup = require("yup");
 const { parse, isDate } = require("date-fns");
-const { tr } = require("date-fns/locale");
 
 function parseDateString(value, originalValue) {
   originalValue = originalValue === "" ? null : originalValue;
