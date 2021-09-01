@@ -1,4 +1,4 @@
-const { validationFile } = require("./validation")
+const { validationData } = require("./validation")
 const fs = require("fs");
 const path = 'articles';
 try {
@@ -28,7 +28,7 @@ try {
                     fs.readFile(`${path}/${articleFile}`, function(error, data){
                         const article = JSON.parse(data);
                         console.log(article);
-                        validationFile(article)
+                        validationData(article)
                         .then((isValid)=> {
                             console.log(isValid);
                             if(isValid){

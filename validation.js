@@ -40,19 +40,18 @@ const articleSchema = yup.object({
     source: yup.mixed().oneOf(['ARTICLE',  'BLOG', 'TWEET', 'NEWSPAPER']).required()
   });
 
-const  validationFile = (data) => {
+const  validationData = (data) => {
     return new Promise((resolve, reject) => {
     articleSchema.validate(data)
     .then(() => {resolve (true)})
     .catch((error) => {
         if(error.name === 'ValidationError'){
           reject(`${error.name}: ${error.errors}`)
-          console.log(`${error.name}: ${error.errors}`);
         }
       });
     });
 }
 
 module.exports = {
-  validationFile
+  validationData
 }
