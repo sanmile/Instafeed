@@ -1,5 +1,5 @@
-const { exception } = require('console');
 const { validationData } = require("./validation");
+const fsOptions = require("./fsOptions");
 const express = require('express');
 const fs = require("fs");
 const hostname = 'localhost';
@@ -7,10 +7,9 @@ var app = express();
 app.use(express.json());
 const port = 8081;
 let articles= [];
-
-const readFile =() =>{
+const readDb =() =>{
     try {
-        fs.readFile(`db.json`, function(error, data){
+        fs.readFile('db.json', function(error, data){
             articles = JSON.parse(data);
         });    
     } catch (error) {
@@ -32,15 +31,7 @@ const getArticle = (id) =>{
     }
 }
 
-const createWriteStreamPromise = (file, article) => {       
-    let articlesJson = fs.readFileSync(file,"utf-8");
-    let articles = articlesJson ? JSON.parse(articlesJson): [];
-    articles.push(article);
-    articlesJson =  JSON.stringify(articles);
-    fs.writeFileSync(file, articlesJson,"utf-8");
-}
-
-readFile();
+readDb();
 
 app.get('/articles', (req, res)=>{
     res.send(articles);
@@ -76,13 +67,13 @@ app.post('/article', (req, res) => {
     .then((isValid)=> {
         console.log(isValid);
         if(isValid){
-            createWriteStreamPromise("db.json", newArticle);
+            fsOptions.createWriteStreamPromise("db.json", newArticle);
             res.statusCode = 201;
             res.send(newArticle);
         }
-        readFile();
+        readDb();
     }).catch(err=> {
-        createWriteStreamPromise("invalid.json", newArticle);
+        fsOptions.createWriteStreamPromise("invalid.json", newArticle);
         res.statusCode = 400;
         res.send(err);
     });
