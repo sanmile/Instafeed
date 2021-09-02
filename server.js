@@ -1,9 +1,7 @@
 const { validationData } = require("./validation");
 const Article = require("./db/mongo/article");
-//const { MongoClient } = require("mongodb");
-const fsOptions = require("./fsOptions");
 const express = require('express');
-const fs = require("fs");
+const { v4: uuidv4 } = require('uuid');
 require('./db/mongo')
 const hostname = 'localhost';
 var app = express();
@@ -20,49 +18,86 @@ const getArticle = async (id) =>{
 }
 
 app.get('/articles', async (req, res)=>{
-    const articles1 = await Article.find({});
-    res.send(articles1);
-  
+    const articles = await Article.find({});
+    res.send(articles);
 });
 
-app.get('/article', async (req, res)=>{
-    const id = req.query.id;
+app.delete('/articles/:id', async (req, res) =>{
+    const articleId = req.params.id;
+
+    const article = await Article.deleteOne({ id: articleId });
+    if (article.deletedCount === 1) 
+        return res.status(204).send();
+    else 
+        return res.status(404).send();
+});
+
+app.get('/articles/:id', async (req, res)=>{
+    const id = req.params.id;
     const article = await getArticle(id);
-    if(article.length === 0) res.statusCode = 404     
+    if(article.length === 0) res.status(404);
 
     res.send(article);
 });
 
-app.post('/article',async (req, res) => {
-    const {id, title, url, keywords, publishedAt,author, readMins, source, modifiedAt} = req.body;
-    const newArticle = {
-        id,
-        title,
-        url,
-        keywords,
-        publishedAt,
-        author,
-        readMins,
-        source,
-        modifiedAt
-    }
-   
-    validationData(newArticle)
+app.post('/articles', (req, res) => {
+    validationData(req.body)
     .then((isValid)=> {
         if(isValid){      
             try {
-                const articuleDb = new Article (newArticle);
+                req.body.id =  uuidv4();
+                const articuleDb = new Article (req.body);
                 articuleDb.save();
-                res.statusCode = 201;
-                res.send(articuleDb);
+                res.status(201).send(articuleDb);
             } catch (error) {
                 res.status(400).send({ ok: false, error: error.message })
             }
         }
     }).catch(err=> {
+        res.status(400).send(err);
+    });
+});
+
+app.put('/articles/:id', (req, res)=>{
+    const articleId = req.params.id;
+    const query = { id: articleId};
+    validationData(req.body)
+    .then((isValid)=> {
+        if(isValid){      
+            Article.updateOne(query, req.body).then((article) =>{
+                if (article.modifiedCount === 1) 
+                    return res.status(200).send();
+                else 
+                    return res.status(404).send();
+            });
+        }
+    }).catch(err=> {
+        res.status(400).send(err);
+    });
+});
+
+app.patch('/articles/:id',async (req, res) => {
+    const article = await getArticle(req.params.id);
+    article[0].title = req.body.title;
+    article[0].readMins = req.body.readMins;
+    article[0].source = req.body.source;
+    validationData(article[0])
+    .then((isValid)=> {
+        if(isValid){      
+            const query = { id: req.params.id};
+            Article.updateOne(query, req.body, {new: true}).then((article) => {
+                if (!article) {
+                    return res.status(404).send();
+                }
+                res.status(200).send();
+            }).catch((error) => {
+                res.status(500).send(error);
+            })
+        }
+    }).catch(err=> {
         res.statusCode = 400;
         res.send(err);
-    });
+    }); 
 });
 
 app.listen(port, hostname, () =>{
