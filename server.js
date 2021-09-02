@@ -1,55 +1,39 @@
 const { validationData } = require("./validation");
+const Article = require("./db/mongo/article");
+//const { MongoClient } = require("mongodb");
 const fsOptions = require("./fsOptions");
 const express = require('express');
 const fs = require("fs");
+require('./db/mongo')
 const hostname = 'localhost';
 var app = express();
 app.use(express.json());
 const port = 8081;
-let articles= [];
-const readDb =() =>{
-    try {
-        fs.readFile('db.json', function(error, data){
-            articles = JSON.parse(data);
-        });    
-    } catch (error) {
-        console.log(error);
-    }
-}
 
-const getArticle = (id) =>{
+const getArticle = async (id) =>{
     try {
-        let article = undefined;
-        if(articles.length > 0)
-        {
-            article = articles.find(a => a.id == id);
-        }
-
+        const article = await Article.find({id: id });
         return article;
     } catch (error) {
         console.log(error);
     }
 }
 
-readDb();
-
-app.get('/articles', (req, res)=>{
-    res.send(articles);
+app.get('/articles', async (req, res)=>{
+    const articles1 = await Article.find({});
+    res.send(articles1);
+  
 });
 
-app.get('/article', (req, res)=>{
+app.get('/article', async (req, res)=>{
     const id = req.query.id;
-    let article = getArticle(id);
-    if(!article)
-    { 
-        article = {};   
-        res.statusCode = 404     
-    }
+    const article = await getArticle(id);
+    if(article.length === 0) res.statusCode = 404     
 
     res.send(article);
 });
 
-app.post('/article', (req, res) => {
+app.post('/article',async (req, res) => {
     const {id, title, url, keywords, publishedAt,author, readMins, source, modifiedAt} = req.body;
     const newArticle = {
         id,
@@ -62,23 +46,23 @@ app.post('/article', (req, res) => {
         source,
         modifiedAt
     }
-
+   
     validationData(newArticle)
     .then((isValid)=> {
-        console.log(isValid);
-        if(isValid){
-            fsOptions.createWriteStreamPromise("db.json", newArticle);
-            res.statusCode = 201;
-            res.send(newArticle);
+        if(isValid){      
+            try {
+                const articuleDb = new Article (newArticle);
+                articuleDb.save();
+                res.statusCode = 201;
+                res.send(articuleDb);
+            } catch (error) {
+                res.status(400).send({ ok: false, error: error.message })
+            }
         }
-        readDb();
     }).catch(err=> {
-        fsOptions.createWriteStreamPromise("invalid.json", newArticle);
         res.statusCode = 400;
         res.send(err);
     });
-
-    
 });
 
 app.listen(port, hostname, () =>{
