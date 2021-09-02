@@ -24,7 +24,6 @@ let lastDay = new Date().setDate(new Date().getDate() - 1);
 lastDay = new Date(lastDay);
 
 const articleSchema = yup.object({
-    id: yup.string().max(36).required(),
     title: yup.string().max(256).required(),
     url: yup.string().url().when('publishedAt',{
       is: null,
