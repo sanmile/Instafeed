@@ -39,7 +39,12 @@ const articleSchema = yup.object({
     source: yup.mixed().oneOf(['ARTICLE',  'BLOG', 'TWEET', 'NEWSPAPER']).required()
   });
 
-const  validationData = (data) => {
+  const authorSchema = yup.object({
+    name: yup.string().max(256).required(),  
+    articles: yup.array(yup.string()),
+  });
+
+const  validationDataArticle = (data) => {
     return new Promise((resolve, reject) => {
     articleSchema.validate(data)
     .then(() => {resolve (true)})
@@ -51,6 +56,19 @@ const  validationData = (data) => {
     });
 }
 
+const  validationDataAuthor = (data) => {
+  return new Promise((resolve, reject) => {
+    authorSchema.validate(data)
+  .then(() => {resolve (true)})
+  .catch((error) => {
+      if(error.name === 'ValidationError'){
+        reject(`${error.name}: ${error.errors}`)
+      }
+    });
+  });
+}
+
 module.exports = {
-  validationData
+  validationDataArticle,
+  validationDataAuthor
 }
