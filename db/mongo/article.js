@@ -7,7 +7,7 @@ const articleSchema = new mongoose.Schema({
   keywords:{ type: [String]},
   modifiedAt: { type: Date, required: true },
   publishedAt: { type: Date, required: false },
-  author: { type: String, required: true },
+  authorId: { type: String, required: true },
   readMins: { type: Number, required: true },
   source: { type: String, required: true }
 })

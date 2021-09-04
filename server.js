@@ -3,7 +3,8 @@ const Article = require("./db/mongo/article");
 const Author = require("./db/mongo/author");
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
-require('./db/mongo')
+const db = require('./db/mongo');
+const { ar } = require("date-fns/locale");
 const hostname = 'localhost';
 var app = express();
 app.use(express.json());
@@ -18,19 +19,39 @@ const getArticle = async (id) =>{
     }
 }
 
+const getAuthor = async (id) =>{
+    try {
+        const author = await Author.find({id: id });
+        return author;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 app.get('/articles', async (req, res)=>{
     const articles = await Article.find({});
     res.send(articles);
 });
 
-app.delete('/articles/:id', async (req, res) =>{
+app.delete('/articles/:id', (req, res) =>{
     const articleId = req.params.id;
 
-    const article = await Article.deleteOne({ id: articleId });
-    if (article.deletedCount === 1) 
-        return res.status(204).send();
-    else 
-        return res.status(404).send();
+    try {
+        Article.deleteOne({ id: articleId }).then((article) => {
+            if (article.deletedCount === 1) 
+            {
+                DeleteArticleToAuthor(articleId);
+                return res.status(204).send();
+            }
+            else 
+                return res.status(404).send();
+            
+        });
+    } catch (error) {
+        return res.status(400).send({error: error.message});
+    }
+   
+   
 });
 
 app.get('/articles/:id', async (req, res)=>{
@@ -46,12 +67,20 @@ app.post('/articles', (req, res) => {
     .then((isValid)=> {
         if(isValid){      
             try {
+                const authorId = req.body.authorId;
                 req.body.id =  uuidv4();
-                const articuleDb = new Article (req.body);
-                articuleDb.save();
-                res.status(201).send(articuleDb);
+                getAuthor(authorId).then((author) => {
+                    if(author.length == 0) throw ("Author not found");
+
+                    const articuleDb = new Article (req.body);
+                    articuleDb.save().then((article) => {
+                        AddArticleToAuthor(authorId,article.id);
+                    });
+                    res.status(201).send(articuleDb);
+                }).catch((error) => { res.status(404).send({error: error })});
+               
             } catch (error) {
-                res.status(400).send({ ok: false, error: error.message })
+                res.status(400).send({error: error.message })
             }
         }
     }).catch(err=> {
@@ -107,7 +136,7 @@ app.get('/authors', async (req, res)=>{
 });
 
 app.get('/authors/:id', async (req, res)=>{
-    const author = await Author.find({id: req.params.id});
+    const author = await getAuthor(req.params.id);
     if(author.length == 0) res.status(404);
 
     res.send(author);
@@ -155,6 +184,27 @@ app.delete('/authors/:id', async (req, res) =>{
     else 
         return res.status(404).send();
 });
+
+const AddArticleToAuthor = async(authorId, articleId)=>{
+
+    var author  = await db.models.Author.updateOne(
+        { id: authorId},
+        { $addToSet: { articles: [articleId] }}
+    );
+    return author;
+};
+
+const DeleteArticleToAuthor = async(articleId)=>{
+    const article = await getArticle(articleId);
+    if(article)
+    {
+        const authorId = article.id;
+        await db.models.Author.updateOne(
+            { id: authorId},
+            { $pull: { articles: {$elemMatch: {articleId} } } }
+        );
+    }
+};
 
 app.listen(port, hostname, () =>{
     console.log(`Server running at http://${hostname}:${port}/`);

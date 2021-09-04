@@ -33,8 +33,7 @@ const articleSchema = yup.object({
     keywords: yup.array(yup.string()).min(1).max(3),
     modifiedAt: yup.date().transform(parseDateString).max(lastDay).required(),
     publishedAt: yup.date().nullable().max(lastDay).transform(parseDateString),
-    author: yup.string().max(100).required(),
-    //author: yup.object(author).required(),
+    authorId: yup.string().max(100).required(),
     readMins: yup.number().positive().min(1).max(20).required(),
     source: yup.mixed().oneOf(['ARTICLE',  'BLOG', 'TWEET', 'NEWSPAPER']).required()
   });
