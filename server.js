@@ -12,7 +12,7 @@ const port = 8081;
 
 const getArticle = async (id) =>{
     try {
-        const article = await Article.find({id: id });
+        const article = await Article.findOne({id: id });
         return article;
     } catch (error) {
         console.log(error);
@@ -21,7 +21,7 @@ const getArticle = async (id) =>{
 
 const getAuthor = async (id) =>{
     try {
-        const author = await Author.find({id: id });
+        const author = await Author.findOne({id: id });
         return author;
     } catch (error) {
         console.log(error);
@@ -33,14 +33,14 @@ app.get('/articles', async (req, res)=>{
     res.send(articles);
 });
 
-app.delete('/articles/:id', (req, res) =>{
+app.delete('/articles/:id', async (req, res) =>{
     const articleId = req.params.id;
 
     try {
+        await DeleteAuthorFromArticle(articleId);
         Article.deleteOne({ id: articleId }).then((article) => {
             if (article.deletedCount === 1) 
             {
-                DeleteArticleToAuthor(articleId);
                 return res.status(204).send();
             }
             else 
@@ -50,14 +50,12 @@ app.delete('/articles/:id', (req, res) =>{
     } catch (error) {
         return res.status(400).send({error: error.message});
     }
-   
-   
 });
 
 app.get('/articles/:id', async (req, res)=>{
     const id = req.params.id;
     const article = await getArticle(id);
-    if(article.length === 0) res.status(404);
+    if(article === null) res.status(404);
 
     res.send(article);
 });
@@ -108,10 +106,10 @@ app.put('/articles/:id', (req, res)=>{
 
 app.patch('/articles/:id',async (req, res) => {
     const article = await getArticle(req.params.id);
-    article[0].title = req.body.title;
-    article[0].readMins = req.body.readMins;
-    article[0].source = req.body.source;
-    validationDataArticle(article[0])
+    article.title = req.body.title;
+    article.readMins = req.body.readMins;
+    article.source = req.body.source;
+    validationDataArticle(article)
     .then((isValid)=> {
         if(isValid){      
             const query = { id: req.params.id};
@@ -137,7 +135,7 @@ app.get('/authors', async (req, res)=>{
 
 app.get('/authors/:id', async (req, res)=>{
     const author = await getAuthor(req.params.id);
-    if(author.length == 0) res.status(404);
+    if(author == null) res.status(404);
 
     res.send(author);
 });
@@ -178,6 +176,7 @@ app.put('/authors/:id', (req, res)=>{
 });
 
 app.delete('/authors/:id', async (req, res) =>{
+    DeleteArticleFromAuthor( req.params.id );
     const author = await Author.deleteOne({ id: req.params.id });
     if (author.deletedCount === 1) 
         return res.status(204).send();
@@ -194,15 +193,24 @@ const AddArticleToAuthor = async(authorId, articleId)=>{
     return author;
 };
 
-const DeleteArticleToAuthor = async(articleId)=>{
+const DeleteAuthorFromArticle = async(articleId)=>{
     const article = await getArticle(articleId);
     if(article)
     {
-        const authorId = article.id;
         await db.models.Author.updateOne(
-            { id: authorId},
-            { $pull: { articles: {$elemMatch: {articleId} } } }
+            { id: article.authorId},
+            { $pull: { articles: articleId } }
         );
+    }
+};
+
+const DeleteArticleFromAuthor = async(authorId)=>{
+    const author = await getAuthor(authorId);
+    if(author && author.articles.length > 0)
+    {
+        author.articles.forEach(article => {
+         Article.deleteOne({ id: article }).then((result)=> console.log(result))
+        });
     }
 };
 
