@@ -4,11 +4,15 @@ const Author = require("./db/mongo/author");
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db = require('./db/mongo');
-const { ar } = require("date-fns/locale");
+const cors = require('cors');
+const helmet = require("helmet");
 const hostname = 'localhost';
-var app = express();
-app.use(express.json());
+const app = express();
 const port = 8081;
+
+app.use(cors());
+app.use(helmet());
+app.use(express.json());
 
 const getArticle = async (id) =>{
     try {
