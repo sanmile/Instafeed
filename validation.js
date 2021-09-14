@@ -9,16 +9,8 @@ function parseDateString(value, originalValue) {
     ? originalValue
     : parse( originalValue, 'MM/dd/yyyy', new Date());
   }
-  
-
   return parsedDate;
 }
-
-// const author = yup.object({
-//   id: yup.string(),
-//   name:yup.string().max(100).required(),
-//   articules: yup.array(yup.string()).nullable
-// });
 
 let lastDay = new Date().setDate(new Date().getDate() - 1);
 lastDay = new Date(lastDay);
