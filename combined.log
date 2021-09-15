@@ -1,0 +1,5 @@
+{"message":"/api/users/sessions - POST - 127.0.0.1","level":"info","service":"user-service"}
+{"message":"/api/users/sessions - POST - 127.0.0.1","level":"info","service":"user-service"}
+{"message":"/api/users/sessions - POST - 127.0.0.1","level":"info","service":"user-service"}
+{"message":"/api/users/sessions - POST - 127.0.0.1","level":"info","service":"user-service"}
+{"message":"/api/articles - GET - 127.0.0.1","level":"info","service":"user-service"}

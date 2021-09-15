@@ -4,6 +4,7 @@ const { validationDataArticle } = require("../../validation");
 const router = require('express').Router();
 const auth = require('../../middleware/authorization');
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../../log/logger');
 
 const getArticle = async (id) =>{
     try {
@@ -35,11 +36,13 @@ const DeleteAuthorFromArticle = async(articleId)=>{
 };
 
 router.get('/', async (req, res)=>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const articles = await Article.find({});
     res.send(articles);
 });
 
 router.delete('/:id', auth.checkToken,auth.checkAdminrole, async (req, res) =>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const articleId = req.params.id;
 
     try {
@@ -59,6 +62,7 @@ router.delete('/:id', auth.checkToken,auth.checkAdminrole, async (req, res) =>{
 });
 
 router.get('/:id', async (req, res)=>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const id = req.params.id;
     const article = await getArticle(id);
     if(article === null) res.status(404);
@@ -67,6 +71,7 @@ router.get('/:id', async (req, res)=>{
 });
 
 router.post('/',auth.checkToken, (req, res) => {
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     validationDataArticle(req.body)
     .then((isValid)=> {
         if(isValid){      
@@ -93,6 +98,7 @@ router.post('/',auth.checkToken, (req, res) => {
 });
 
 router.put('/:id',auth.checkToken, (req, res)=>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const articleId = req.params.id;
     const query = { id: articleId};
     validationDataArticle(req.body)
@@ -111,6 +117,7 @@ router.put('/:id',auth.checkToken, (req, res)=>{
 });
 
 router.patch('/:id',async (req, res) => {
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const article = await getArticle(req.params.id);
     article.title = req.body.title;
     article.readMins = req.body.readMins;
