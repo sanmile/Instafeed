@@ -1,5 +1,5 @@
-const passport = require('passport');
 const router = require('express').Router();
+const logger = require('../../log/logger');
 const User = require('../../db/mongo/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -7,6 +7,7 @@ const auth = require('../../middleware/authorization');
 const { v4: uuidv4 } = require('uuid');
 
 router.post('/sessions', async (req, res, next) => {
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     if(req.body.email && req.body.password){      
         try {
             const user = await User.findOne({email: req.body.email });
@@ -36,6 +37,7 @@ router.post('/sessions', async (req, res, next) => {
 });
 
 router.get('/',  async (req, res)=>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     try {
         const users = await User.find({});
         return res.send(users);    
@@ -46,6 +48,7 @@ router.get('/',  async (req, res)=>{
 });
 
 router.get('/:id', async (req, res)=>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const user = await User.findOne({id: req.params.id });
     if(user == null) res.status(404);
 
@@ -53,7 +56,7 @@ router.get('/:id', async (req, res)=>{
 });
 
 router.post('/', auth.checkToken, async (req, res)=>{
-    
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     if(!req.params.email && !req.params.password){      
         try {
             const user = await User.findOne({email: req.body.email });
@@ -81,6 +84,7 @@ router.post('/', auth.checkToken, async (req, res)=>{
 });
 
 router.delete('/:id',  auth.checkToken, auth.checkAdminrole, async (req, res) =>{
+    logger.info(`${req.originalUrl} - ${req.method} - ${req.ip}`);
     const user = await User.deleteOne({ id: req.params.id });
     if (user.deletedCount === 1) 
         return res.status(204).send();
